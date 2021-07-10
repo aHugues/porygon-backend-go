@@ -1,0 +1,35 @@
+# Go
+# Build your Go project.
+# Add steps that test, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/go
+
+trigger:
+  - master
+
+pr:
+  - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps: 
+- task: GoTool@0
+  inputs:
+    version: '1.15.8'
+- task: CmdLine@2
+  displayName: 'Build project'
+  inputs:
+    script: 'make build'
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
+- task: CmdLine@2
+  displayName: 'Run tests'
+  inputs:
+    script: 'make test-psql'
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
+- task: CmdLine@2
+  displayName: 'Upload Coverage'
+  env:
+    CODECOV_TOKEN: $(CODECOV_TOKEN)
+  inputs:
+    script: bash <(curl -s https://codecov.io/bash)
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
